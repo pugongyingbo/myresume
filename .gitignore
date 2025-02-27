@@ -1,0 +1,39 @@
+# 依赖
+node_modules/
+.pnp
+.pnp.js
+
+# 测试覆盖率
+coverage/
+
+# next.js
+.next/
+out/
+
+# 生产环境构建文件
+build
+dist
+
+# 其他
+.DS_Store
+*.pem
+.env*
+!.env.example
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
