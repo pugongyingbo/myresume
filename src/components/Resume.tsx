@@ -83,16 +83,59 @@ const PreviewContainer = styled.div`
   min-width: 0;
 `;
 
+// 修改 Toolbar 样式
 const Toolbar = styled.div`
-  padding: 12px 20px;
+  padding: 16px 24px;
   background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  margin-bottom: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  margin-bottom: 24px;
   display: flex;
-  gap: 12px;
+  gap: 24px;
   align-items: center;
 `;
+
+// 添加工具栏按钮样式
+const ToolbarButton = styled.button`
+  padding: 8px 16px;
+  background: #f5f7fa;
+  border: 1px solid #e4e7ed;
+  border-radius: 6px;
+  color: #606266;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.3s;
+  
+  &:hover {
+    background: #ecf5ff;
+    border-color: #409eff;
+    color: #409eff;
+  }
+`;
+
+// 添加选择器样式
+const StyledSelect = styled.select`
+  padding: 6px 12px;
+  border: 1px solid #e4e7ed;
+  border-radius: 6px;
+  color: #606266;
+  font-size: 14px;
+  outline: none;
+  cursor: pointer;
+  
+  &:hover {
+    border-color: #c0c4cc;
+  }
+  
+  &:focus {
+    border-color: #409eff;
+  }
+`;
+
+
 
 const ResumeContent = styled.div`
   flex: 1;
@@ -134,7 +177,13 @@ const ActionButtons = styled.div.attrs({ className: 'action-buttons' })`
   transition: opacity 0.2s;
 `;
 
-const ActionButton = styled.button.attrs(props => ({
+// 添加类型定义
+interface ExportButtonProps {
+  color?: string;
+}
+
+// 修改 ActionButton 的类型定义
+const ActionButton = styled.button.attrs<ExportButtonProps>((props) => ({
   className: props.style?.position === 'absolute' ? 'add-button' : ''
 }))`
   padding: 4px 8px;
@@ -245,88 +294,109 @@ const Select = styled.select`
 
 
 const Resume = () => {
+  // 添加验证函数
+  const validateKey = (key: string) => {
+  // 这里可以设置你的验证逻辑，比如固定的密钥或其他规则
+  return key === 'MSHF23';
+  };
+  
   const exportPDF = async () => {
-    try {
-      // 临时隐藏操作按钮
-      const actionButtons = document.querySelectorAll('.action-buttons') as NodeListOf<HTMLElement>;
-      const addButtons = document.querySelectorAll('.add-button') as NodeListOf<HTMLElement>;
-      actionButtons.forEach(btn => (btn.style.display = 'none'));
-      addButtons.forEach(btn => (btn.style.display = 'none'));
+  try {
+  const key = prompt('请输入导出验证码：');
+  if (!key || !validateKey(key)) {
+  alert('验证码无效，无法导出！');
+  return;
+  }
   
-      const content = document.querySelector('.resume-content');
-      if (!content) return;
+  // 临时隐藏操作按钮
+  const actionButtons = document.querySelectorAll('.action-buttons') as NodeListOf<HTMLElement>;
+  const addButtons = document.querySelectorAll('.add-button') as NodeListOf<HTMLElement>;
+  actionButtons.forEach(btn => (btn.style.display = 'none'));
+  addButtons.forEach(btn => (btn.style.display = 'none'));
   
-      const sections = document.querySelectorAll('.resume-section') as NodeListOf<HTMLElement>;
-    sections.forEach(section => {
-      section.style.paddingRight = '0';
-    });
-      const canvas = await html2canvas(content as HTMLElement, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff',
-        windowWidth: content.scrollWidth,
-        windowHeight: content.scrollHeight
-      });
+  const content = document.querySelector('.resume-content');
+  if (!content) return;
   
-      const imgWidth = 210;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+  const sections = document.querySelectorAll('.resume-section') as NodeListOf<HTMLElement>;
+  sections.forEach(section => {
+  section.style.paddingRight = '0';
+  });
+  const canvas = await html2canvas(content as HTMLElement, {
+  scale: 2,
+  useCORS: true,
+  logging: false,
+  backgroundColor: '#ffffff',
+  windowWidth: content.scrollWidth,
+  windowHeight: content.scrollHeight
+  });
   
-      const pdf = new jsPDF('p', 'mm', 'a4');
+  const imgWidth = 210;
+  const imgHeight = (canvas.height * imgWidth) / canvas.width;
   
-      pdf.addImage(
-        canvas.toDataURL('image/jpeg', 1.0),
-        'JPEG',
-        0,
-        0,
-        imgWidth,
-        imgHeight
-      );
+  const pdf = new jsPDF('p', 'mm', 'a4');
   
-      pdf.save('我的简历.pdf');
-      // 恢复按钮显示和样式
-    actionButtons.forEach(btn => (btn.style.display = ''));
-    addButtons.forEach(btn => (btn.style.display = ''));
-    sections.forEach(section => {
-      section.style.paddingRight = '120px';
-    });
-    } catch (error) {
-      console.error('导出PDF失败:', error);
-    }
+  pdf.addImage(
+  canvas.toDataURL('image/jpeg', 1.0),
+  'JPEG',
+  0,
+  0,
+  imgWidth,
+  imgHeight
+  );
+  
+  pdf.save('我的简历.pdf');
+  // 恢复按钮显示和样式
+  actionButtons.forEach(btn => (btn.style.display = ''));
+  addButtons.forEach(btn => (btn.style.display = ''));
+  sections.forEach(section => {
+  section.style.paddingRight = '120px';
+  });
+  } catch (error) {
+  console.error('导出PDF失败:', error);
+  }
   };
   // 添加新的状态
   const [lineHeight, setLineHeight] = useState('1.2');
   const [themeColor, setThemeColor] = useState('#4169E1');
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [personalInfo, setPersonalInfo] = useState({
-    name: '',
-    phone: '',
-    email: '',
-    city: '',
-    position: ''
+    name: '张三',
+    phone: '13800138000',
+    email: 'zhangsan@example.com',
+    city: '上海',
+    position: '前端开发工程师'
   });
+
   const [education, setEducation] = useState([{
-    school: '',
-    major: '',
-    degree: '',
-    startTime: '',
-    endTime: ''
+    school: '示例大学',
+    major: '计算机科学与技术',
+    degree: '本科',
+    startTime: '2019年09月',
+    endTime: '2023年06月'
   }]);
-  const [skills, setSkills] = useState(['']);
+
+  const [skills, setSkills] = useState([
+    '<ul><li>熟练掌握 HTML、CSS、JavaScript，具有良好的编程习惯</li><li>熟悉 React、Vue 等前端框架，了解其核心原理</li><li>熟悉 Node.js，有实际项目开发经验</li></ul>'
+  ]);
+
   const [workExperience, setWorkExperience] = useState([{
-    company: '',
-    position: '',
-    startTime: '',
-    endTime: '',
-    description: ''
+    company: '示例科技有限公司',
+    position: '前端开发工程师',
+    startTime: '2023年07月',
+    endTime: '至今',
+    description: '<ul><li>负责公司主要产品的前端开发工作</li><li>参与项目架构设计和技术选型</li><li>优化前端性能，提升用户体验</li></ul>'
   }]);
+
   const [projects, setProjects] = useState([{
-    name: '',
-    startTime: '',
-    endTime: '',
-    description: ''
+    name: '企业管理系统',
+    startTime: '2023年08月',
+    endTime: '2023年12月',
+    description: '<ul><li>使用 React + TypeScript 开发的企业管理系统</li><li>实现了用户管理、权限控制等核心功能</li><li>优化了系统性能，提升了加载速度</li></ul>'
   }]);
-  const [summary, setSummary] = useState(['']);
+
+  const [summary, setSummary] = useState([
+    '<p>3年前端开发经验，熟悉现代前端技术栈，具有良好的团队协作能力和问题解决能力。热爱技术，持续学习，期待加入优秀的团队。</p>'
+  ]);
 
 
   const renderForm = () => {
@@ -666,8 +736,8 @@ const Resume = () => {
         <PreviewContainer>
           <Toolbar>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span>行高</span>
-              <select 
+              <span style={{ color: '#606266', fontSize: '14px' }}>行高</span>
+              <StyledSelect 
                 value={lineHeight} 
                 onChange={(e) => setLineHeight(e.target.value)}
               >
@@ -676,17 +746,34 @@ const Resume = () => {
                 <option value="1.5">1.5</option>
                 <option value="1.8">1.8</option>
                 <option value="2.0">2.0</option>
-              </select>
+              </StyledSelect>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span>主题色</span>
+              <span style={{ color: '#606266', fontSize: '14px' }}>主题色</span>
               <input 
                 type="color" 
                 value={themeColor}
                 onChange={(e) => setThemeColor(e.target.value)}
+                style={{ 
+                  width: '32px', 
+                  height: '32px', 
+                  padding: '2px',
+                  border: '1px solid #e4e7ed',
+                  borderRadius: '6px',
+                  cursor: 'pointer'
+                }}
               />
             </div>
-            <button onClick={exportPDF}>导出PDF</button>
+            <ToolbarButton onClick={exportPDF}>
+              <span>导出PDF</span>
+            </ToolbarButton>
+            <span style={{ 
+              color: '#909399', 
+              fontSize: '12px',
+              marginLeft: '8px'
+            }}>
+              关注公众号：码上烟火 回复"简历"获取导出验证码
+            </span>
           </Toolbar>
           <ResumeContent className="resume-content" style={{ lineHeight }}>
             <ResumeSection className="resume-section" color={themeColor} onClick={() => setActiveSection('personalInfo')}>
