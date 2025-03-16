@@ -297,7 +297,7 @@ const Resume = () => {
   // 添加验证函数
   const validateKey = (key: string) => {
   // 这里可以设置你的验证逻辑，比如固定的密钥或其他规则
-  return key === 'MSHF23';
+  return key === process.env.RESUME_KEY;
   };
   
   const exportPDF = async () => {
